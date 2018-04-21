@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -22,6 +24,8 @@ import javax.swing.table.DefaultTableModel;
 
 public class Books extends JDialog {
     private static String GET_ALL_BOOKS = "SELECT * FROM books";
+    private static String GET_BOOK_CHARACTERISTIC = "SELECT * FROM book_characteristic WHERE id_book='%s'";
+    private static String GET_CHARACTERISTIC = "SELECT * FROM  characteristics WHERE id_characteristic='%s'";
 
     private JButton button = new JButton("Добавить книгу");
     private JLabel label = new JLabel("Книги", SwingConstants.CENTER);
@@ -41,6 +45,7 @@ public class Books extends JDialog {
         model.addColumn("Название");
         model.addColumn("Автор");
         model.addColumn("Цена");
+        model.addColumn("Характеристики");
         table.getSelectionModel().addListSelectionListener(new TableEventListener(this));
         container.add(new JScrollPane(table));
         button.addActionListener(new ButtonEventListener(this));
@@ -92,7 +97,8 @@ public class Books extends JDialog {
                 String name = rs.getString(2);
                 String author = rs.getString(3);
                 int price = rs.getInt(4);
-                model.addRow(new Object[] { id, name, author, price });
+                Map<String, String> characteristics = getCharacteristics(con, id);
+                model.addRow(new Object[] { id, name, author, price, characteristics });
             }
         } catch (SQLException sqlEx) {
             sqlEx.printStackTrace();
@@ -116,6 +122,43 @@ public class Books extends JDialog {
             } catch (SQLException se) {
             }
         }
+    }
+
+    private Map<String, String> getCharacteristics(Connection con, int bookId) throws SQLException {
+        Map<String, String> result = new HashMap<>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = GetConnection.createConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(String.format(GET_BOOK_CHARACTERISTIC, bookId));
+            if (rs.next()) {
+                int idCharacteristick = rs.getInt(2);
+                String value = rs.getString(3);
+                rs = stmt.executeQuery(String.format(GET_CHARACTERISTIC, idCharacteristick));
+                if (rs.next()) {
+                    String name = rs.getString(2);
+                    result.put(name, value);
+                }
+            }
+
+        } catch (SQLException sqlEx) {
+            sqlEx.printStackTrace();
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException se) {
+            }
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException se) {
+            }
+        }
+        return result;
     }
 
 }

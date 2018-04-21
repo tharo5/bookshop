@@ -14,7 +14,10 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 public class EditBook extends JDialog {
 
@@ -23,6 +26,8 @@ public class EditBook extends JDialog {
             + "SET `book` = '%s', `author` = '%s', `price` = '%s'"
             + "WHERE `id_book` = '%s'";
     private static String DELETE_BOOK = "DELETE FROM `books` WHERE id_book=%s";
+    private static String GET_BOOK_CHARACTERISTIC = "SELECT * FROM book_characteristic WHERE id_book='%s'";
+    private static String GET_CHARACTERISTIC = "SELECT * FROM  characteristics WHERE id_characteristic='%s'";
     private String id;
 
     private JLabel nameLabel = new JLabel("Название");
@@ -31,6 +36,9 @@ public class EditBook extends JDialog {
     private JTextField authorText = new JTextField();
     private JLabel priceLabel = new JLabel("Цена");
     private JTextField priceText = new JTextField();
+    private JLabel characteristicsLabel = new JLabel("Характеристики");
+    private DefaultTableModel model = new DefaultTableModel();
+    private JTable table = new JTable(model);
     private JButton saveButton = new JButton("Сохранить");
     private JButton deleteButton = new JButton("Удалить");
 
@@ -48,6 +56,11 @@ public class EditBook extends JDialog {
         container.add(authorText);
         container.add(priceLabel);
         container.add(priceText);
+        container.add(characteristicsLabel);
+        model.addColumn("Название");
+        model.addColumn("Значение");
+        loadCharacteristics();
+        container.add(new JScrollPane(table));
         saveButton.addActionListener(new SaveButtonEventListener(getOwner()));
         container.add(saveButton);
         deleteButton.addActionListener(new DeleteButtonEventListener(getOwner()));
@@ -79,6 +92,41 @@ public class EditBook extends JDialog {
                 }
             } catch (SQLException se) {
             }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException se) {
+            }
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException se) {
+            }
+        }
+    }
+
+    public void loadCharacteristics() {
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = GetConnection.createConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(String.format(GET_BOOK_CHARACTERISTIC, id));
+            if (rs.next()) {
+                int idCharacteristick = rs.getInt(2);
+                String value = rs.getString(3);
+                rs = stmt.executeQuery(String.format(GET_CHARACTERISTIC, idCharacteristick));
+                if (rs.next()) {
+                    String name = rs.getString(2);
+                    model.addRow(new Object[] { name, value });
+                }
+            }
+        } catch (SQLException sqlEx) {
+            sqlEx.printStackTrace();
+        } finally {
             try {
                 if (stmt != null) {
                     stmt.close();

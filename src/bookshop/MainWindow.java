@@ -19,11 +19,11 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         super("Основное меню");
-        this.setBounds(100, 100, 600, 400);
+        this.setBounds(100, 100, 600, 200);
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Container container = this.getContentPane();
-        container.setLayout(new GridLayout(2, 3, 2, 2));
+        container.setLayout(new GridLayout(1, 4, 2, 2));
         employeesButton.addActionListener(new ButtonEventListener(this));
         container.add(employeesButton);
         clientsButton.addActionListener(new ButtonEventListener(this));
@@ -32,10 +32,10 @@ public class MainWindow extends JFrame {
         container.add(booksButton);
         ordersButton.addActionListener(new ButtonEventListener(this));
         container.add(ordersButton);
-        bookCharactersisticsBbutton.addActionListener(new ButtonEventListener(this));
-        container.add(bookCharactersisticsBbutton);
-        charactersisticsBbutton.addActionListener(new ButtonEventListener(this));
-        container.add(charactersisticsBbutton);
+        // bookCharactersisticsBbutton.addActionListener(new ButtonEventListener(this));
+        // container.add(bookCharactersisticsBbutton);
+        // charactersisticsBbutton.addActionListener(new ButtonEventListener(this));
+        // container.add(charactersisticsBbutton);
     }
 
     class ButtonEventListener implements ActionListener {
